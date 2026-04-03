@@ -29,22 +29,25 @@ class ProductDetailPage extends StatefulWidget {
   State<ProductDetailPage> createState() => _ProductDetailPageState();
 }
 
-class _ProductDetailPageState extends State<ProductDetailPage> {
+class _ProductDetailPageState extends State<ProductDetailPage> with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
+  late AnimationController _animationController;
+  late Animation<double> _rotationAnimation;
+
   double _scrollOffset = 0.0;
   Color _backgroundColor1 = Colors.blueGrey.shade900;
   Color _backgroundColor2 = Colors.blueGrey.shade700;
 
-  // Placeholder for product data. In a real app, this would come from a model.
+  // Placeholder for product data. Using network images now.
   final List<Product> products = [
     Product(
       name: 'Sport Shoe X',
-      imagePath: 'assets/shoe_x.png',
+      imageUrl: 'https://i.imgur.com/2X8p1gY.png', // Example transparent PNG shoe
       dominantColors: [Colors.red.shade800, Colors.red.shade400], // Example dominant colors
     ),
     Product(
       name: 'Luxury Handbag',
-      imagePath: 'assets/handbag_y.png',
+      imageUrl: 'https://i.imgur.com/3Y0j4fX.png', // Example transparent PNG handbag
       dominantColors: [Colors.brown.shade800, Colors.brown.shade400], // Example dominant colors
     ),
     // Add more products as needed
@@ -52,7 +55,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   Product _currentProduct = Product(
     name: 'Sport Shoe X',
-    imagePath: 'assets/shoe_x.png',
+    imageUrl: 'https://i.imgur.com/2X8p1gY.png',
     dominantColors: [Colors.red.shade800, Colors.red.shade400],
   );
 
@@ -60,8 +63,24 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_updateScroll);
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _rotationAnimation = Tween<double>(begin: 0.0, end: 0.0).animate(_animationController);
+
     // Initialize with the first product's colors
     _updateBackgroundColors(_currentProduct.dominantColors);
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.isScrollingNotifier.value == false) {
+        // User stopped scrolling, start inertia animation
+        _animationController.forward(from: 0.0);
+      } else {
+        // User is scrolling, stop inertia animation
+        _animationController.stop();
+      }
+    });
   }
 
   void _updateScroll() {
@@ -84,22 +103,23 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     });
   }
 
-  // In a real application, you would extract dominant colors from the image dynamically.
-  // For this example, we are using pre-defined dominantColors in the Product model.
-  // A package like `palette_generator` could be used for this.
-
   @override
   Widget build(BuildContext context) {
-    // Calculate rotation based on scroll offset
-    // The rotation factor can be adjusted for desired sensitivity
-    final double rotationAngle = (_scrollOffset / 300) * math.pi * 2; // Full rotation every 300 pixels
+    // Calculate rotation based on scroll offset and inertia
+    final double baseRotationAngle = (_scrollOffset / 300) * math.pi * 2; // Full rotation every 300 pixels
+    final double effectiveRotationAngle = baseRotationAngle + (_rotationAnimation.value * 0.1); // Add a small inertia effect
+
+    // Calculate parallax effect for background gradient
+    final double parallaxOffset = _scrollOffset * 0.001; // Adjust sensitivity
+    final Alignment beginAlignment = Alignment.topLeft.add(Alignment(parallaxOffset, parallaxOffset));
+    final Alignment endAlignment = Alignment.bottomRight.add(Alignment(-parallaxOffset, -parallaxOffset));
 
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: beginAlignment,
+            end: endAlignment,
             colors: [_backgroundColor1, _backgroundColor2],
             tileMode: TileMode.clamp,
           ),
@@ -123,16 +143,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               child: SizedBox(
                 height: MediaQuery.of(context).size.height * 0.6, // Adjust height as needed
                 child: Center(
-                  child: Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, 0.001) // Perspective
-                      ..rotateY(rotationAngle), // Y-axis rotation
-                    child: Image.asset(
-                      _currentProduct.imagePath,
-                      fit: BoxFit.contain,
-                      height: 300,
-                    ),
+                  child: AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (context, child) {
+                      return Transform(
+                        alignment: Alignment.center,
+                        transform: Matrix4.identity()
+                          ..setEntry(3, 2, 0.001) // Perspective
+                          ..rotateY(effectiveRotationAngle) // Y-axis rotation
+                          ..rotateX(effectiveRotationAngle * 0.2), // Add slight tilt on X-axis
+                        child: Image.network(
+                          _currentProduct.imageUrl,
+                          fit: BoxFit.contain,
+                          height: 300,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -184,43 +210,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 }
 
 class Product {
   final String name;
-  final String imagePath;
+  final String imageUrl;
   final List<Color> dominantColors;
 
   Product({
     required this.name,
-    required this.imagePath,
+    required this.imageUrl,
     required this.dominantColors,
   });
 }
-
-// To make the dynamic color palette truly dynamic based on the image,
-// you would typically use a package like `palette_generator`.
-// Example usage (conceptual):
-/*
-import 'package:palette_generator/palette_generator.dart';
-
-Future<List<Color>> _updatePalette(String imagePath) async {
-  final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
-    AssetImage(imagePath),
-    maximumColorCount: 2,
-  );
-  return generator.colors.toList();
-}
-*/
-
-// Remember to add product images to your `pubspec.yaml` under the `assets` section.
-// For example:
-/*
-flutter:
-  uses-material-design: true
-  assets:
-    - assets/shoe_x.png
-    - assets/handbag_y.png
-*/

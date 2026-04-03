@@ -21,6 +21,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/shoe_x.png
-    - assets/handbag_y.png
+  # assets:
+  #   - assets/shoe_x.png
+  #   - assets/handbag_y.png
