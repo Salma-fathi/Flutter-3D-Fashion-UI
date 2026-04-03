@@ -40,7 +40,8 @@ A professional and innovative Flutter UI project showcasing a fashion applicatio
 ## 🛠️ Built With
 
 -   [Flutter](https://flutter.dev/) - The UI toolkit for building beautiful, natively compiled applications.
--   [Dart](https://dart.dev/) - The programming language behind Flutter.
+-   [Dart](https://dart.dev/) - The programming language behind
+-   Flutter.
 
 ## 📸 Preview
 
@@ -56,4 +57,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Developed with ❤️ by [Your Name/Manus AI]
+Developed with Salma
