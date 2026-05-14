@@ -1,0 +1,13 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Flutter Web Run",
+            "type": "shell",
+            "command": "flutter",
+            "args": ["run", "-d", "web"],
+            "isBackground": true,
+            "problemMatcher": []
+        }
+    ]
+}
