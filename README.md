@@ -32,10 +32,25 @@ A professional and innovative Flutter UI project showcasing a fashion applicatio
     ```bash
     flutter pub get
     ```
-4.  **Run the app**:
+4.  **Run the app (web)**:
     ```bash
-    flutter run
+    flutter run -d chrome
     ```
+
+### Makefile shortcuts
+
+Run all steps above with:
+
+```bash
+make all
+```
+
+Or run individual steps:
+
+```bash
+make pub-get
+make run-web
+```
 
 ## 🛠️ Built With
 
