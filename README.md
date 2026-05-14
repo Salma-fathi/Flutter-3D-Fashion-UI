@@ -28,13 +28,17 @@ A professional and innovative Flutter UI project showcasing a fashion applicatio
     ```bash
     cd Flutter-3D-Fashion-UI
     ```
-3.  **Install dependencies**:
+3.  **Generate platform folders (required for fresh source-only clones)**:
+    ```bash
+    flutter create .
+    ```
+4.  **Install dependencies**:
     ```bash
     flutter pub get
     ```
-4.  **Run the app**:
+5.  **Run the web app**:
     ```bash
-    flutter run
+    flutter run -d chrome
     ```
 
 ## 🛠️ Built With
